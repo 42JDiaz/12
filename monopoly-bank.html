@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonoBank — Banco Digital Monopoly</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --surface2: #F0F2F5;
+    --surface3: #E8EAED;
+    --border: #E2E5EA;
+    --text: #1A1D23;
+    --text2: #5F6472;
+    --text3: #9EA3AF;
+    --accent: #1A73E8;
+    --accent-soft: #E8F0FE;
+    --green: #1E8E3E;
+    --green-soft: #E6F4EA;
+    --red: #D93025;
+    --red-soft: #FCE8E6;
+    --yellow: #F9AB00;
+    --yellow-soft: #FEF7E0;
+    --purple: #8430CE;
+    --purple-soft: #F3E8FD;
+    --mono-red: #CC1616;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 24px rgba(0,0,0,0.10);
+    --font: 'Google Sans', 'Segoe UI', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  /* ─── LOGIN SCREEN ─── */
+  #screen-login {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: linear-gradient(145deg, #F0F4FF 0%, #FFF8F0 100%);
+    padding: 24px;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--mono-red), #FF5722);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(204,22,22,0.25);
+  }
+
+  .login-title { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .login-sub { color: var(--text2); font-size: 14px; margin-bottom: 36px; }
+
+  .input-group { margin-bottom: 16px; }
+  .input-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .input-group input {
+    width: 100%; padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 15px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none; transition: border-color .2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 13px 24px; border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 15px; font-weight: 500;
+    cursor: pointer; border: none; transition: all .2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: white; width: 100%; }
+  .btn-primary:hover { background: #1558B0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,115,232,0.3); }
+  .btn-ghost { background: transparent; color: var(--text2); }
+  .btn-ghost:hover { background: var(--surface2); }
+  .btn-danger { background: var(--red-soft); color: var(--red); }
+  .btn-danger:hover { background: var(--red); color: white; }
+  .btn-green { background: var(--green-soft); color: var(--green); }
+  .btn-green:hover { background: var(--green); color: white; }
+  .btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  .new-game-section { text-align: center; }
+  .new-game-section p { color: var(--text3); font-size: 13px; margin-bottom: 12px; }
+
+  /* ─── SETUP SCREEN ─── */
+  #screen-setup {
+    flex-direction: column;
+    background: linear-gradient(145deg, #F0F4FF 0%, #FFF8F0 100%);
+    padding: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .setup-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 40px;
+    width: 100%; max-width: 480px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+  }
+
+  .setup-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .setup-card p { color: var(--text2); font-size: 14px; margin-bottom: 28px; }
+
+  .player-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .player-entry {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; background: var(--surface2);
+    border-radius: var(--radius-sm);
+  }
+  .player-avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .player-entry input {
+    flex: 1; border: none; background: transparent;
+    font-family: var(--font); font-size: 14px; color: var(--text); outline: none;
+  }
+  .player-entry .remove-btn {
+    width: 24px; height: 24px; border-radius: 50%; border: none;
+    background: var(--red-soft); color: var(--red); cursor: pointer;
+    font-size: 14px; display: flex; align-items: center; justify-content: center;
+  }
+
+  .add-player-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; background: var(--surface2);
+    border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
+    color: var(--text3); font-family: var(--font); font-size: 14px;
+    cursor: pointer; width: 100%; transition: all .2s;
+  }
+  .add-player-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  /* ─── MAIN APP ─── */
+  #screen-app {
+    flex-direction: column;
+    background: var(--bg);
+    min-height: 100vh;
+  }
+
+  /* Top Bar */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar-logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--mono-red), #FF5722);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .topbar-title { font-size: 17px; font-weight: 700; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+  /* Timer */
+  .timer-badge {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; background: var(--surface2);
+    border-radius: 20px; font-size: 14px; font-weight: 500; color: var(--text2);
+    cursor: pointer; user-select: none; border: 1px solid var(--border);
+    transition: all .2s;
+  }
+  .timer-badge.running { background: var(--green-soft); color: var(--green); border-color: var(--green); }
+  .timer-badge .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--text3);
+  }
+  .timer-badge.running .dot { background: var(--green); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* Main Layout */
+  .app-body {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header h3 { font-size: 14px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; }
+
+  /* Player List Sidebar */
+  .player-card-item {
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; transition: background .15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .player-card-item:last-child { border-bottom: none; }
+  .player-card-item:hover { background: var(--surface2); }
+  .player-card-item.active { background: var(--accent-soft); }
+
+  .player-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+    position: relative;
+  }
+  .turn-ring {
+    position: absolute; inset: -3px;
+    border-radius: 50%; border: 2.5px solid transparent;
+  }
+  .turn-ring.active { border-color: var(--accent); animation: spin-ring 3s linear infinite; }
+  @keyframes spin-ring {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .player-info { flex: 1; min-width: 0; }
+  .player-name { font-size: 14px; font-weight: 600; }
+  .player-balance { font-size: 13px; color: var(--text2); }
+
+  .player-prop-count {
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    background: var(--surface2); border-radius: 20px; color: var(--text3);
+  }
+
+  /* Main Content */
+  .main-content {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* Current Player Panel */
+  .player-panel {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .player-panel-header {
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, white 60%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .player-panel-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: white;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  }
+
+  .player-panel-info { flex: 1; }
+  .player-panel-name { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
+  .player-panel-sub { font-size: 13px; color: var(--text2); }
+
+  .balance-display {
+    text-align: right;
+  }
+  .balance-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+  .balance-amount { font-size: 28px; font-weight: 700; color: var(--green); }
+
+  /* Quick Actions */
+  .quick-actions {
+    padding: 20px 24px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+
+  .action-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 14px 8px;
+    background: var(--surface2);
+    border-radius: 12px; border: 1px solid var(--border);
+    cursor: pointer; transition: all .2s;
+    font-family: var(--font);
+  }
+  .action-btn:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-2px); }
+  .action-btn .icon { font-size: 22px; }
+  .action-btn .label { font-size: 12px; font-weight: 500; color: var(--text2); text-align: center; line-height: 1.2; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 2px;
+    background: var(--surface2); padding: 4px; border-radius: 10px;
+    margin: 0 24px 0;
+  }
+  .tab {
+    flex: 1; padding: 8px 12px; border-radius: 8px;
+    font-family: var(--font); font-size: 13px; font-weight: 500;
+    color: var(--text2); border: none; background: transparent;
+    cursor: pointer; transition: all .2s;
+  }
+  .tab.active { background: white; color: var(--text); box-shadow: var(--shadow); }
+
+  .tab-content { display: none; padding: 20px 24px; }
+  .tab-content.active { display: block; }
+
+  /* Transaction Form */
+  .tx-form { display: flex; flex-direction: column; gap: 14px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  .form-group select, .form-group input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: var(--font); font-size: 14px;
+    background: var(--surface); color: var(--text); outline: none; transition: border-color .2s;
+  }
+  .form-group select:focus, .form-group input:focus { border-color: var(--accent); }
+
+  .amount-input-wrap { position: relative; }
+  .amount-input-wrap .currency { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text2); }
+  .amount-input-wrap input { padding-left: 30px; }
+
+  /* Presets */
+  .preset-amounts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .preset-btn {
+    padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface2);
+    font-family: var(--font); font-size: 12px; font-weight: 500;
+    color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .preset-btn:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  /* Properties */
+  .props-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+
+  .prop-card {
+    border-radius: 10px; overflow: hidden;
+    border: 1.5px solid var(--border);
+    cursor: pointer; transition: all .2s;
+  }
+  .prop-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+  .prop-color { height: 8px; }
+  .prop-body { padding: 10px 12px; }
+  .prop-name { font-size: 12px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; }
+  .prop-price { font-size: 11px; color: var(--text2); }
+  .prop-owner { font-size: 10px; font-weight: 500; margin-top: 5px; padding: 2px 8px; border-radius: 20px; display: inline-block; }
+
+  /* History */
+  .history-list { display: flex; flex-direction: column; gap: 0; }
+
+  .history-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+
+  .history-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .history-info { flex: 1; min-width: 0; }
+  .history-desc { font-size: 13px; font-weight: 500; }
+  .history-time { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .history-amount { font-size: 14px; font-weight: 600; }
+  .history-amount.credit { color: var(--green); }
+  .history-amount.debit { color: var(--red); }
+
+  /* Right Panel */
+  .right-panel {
+    width: 280px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); }
+  .stat-cell { background: white; padding: 16px; }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .stat-value { font-size: 18px; font-weight: 700; }
+
+  /* Turn indicator */
+  .turn-card { padding: 20px; }
+  .turn-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+  .turn-player {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: var(--accent-soft);
+    border-radius: 10px; border: 1px solid rgba(26,115,232,.2);
+  }
+  .turn-player-name { font-size: 14px; font-weight: 600; color: var(--accent); }
+
+  /* Bank operations */
+  .bank-ops { padding: 0; }
+  .bank-op-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background .15s;
+  }
+  .bank-op-item:last-child { border-bottom: none; }
+  .bank-op-item:hover { background: var(--surface2); }
+  .bank-op-left { display: flex; align-items: center; gap: 10px; }
+  .bank-op-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+  .bank-op-name { font-size: 13px; font-weight: 500; }
+  .bank-op-desc { font-size: 11px; color: var(--text3); }
+  .bank-op-arrow { color: var(--text3); font-size: 16px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+    z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: white; border-radius: 20px;
+    width: 100%; max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden; animation: modal-in .2s ease;
+  }
+  @keyframes modal-in { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .modal-header {
+    padding: 20px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: none; background: var(--surface2);
+    cursor: pointer; font-size: 16px; color: var(--text2);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .modal-close:hover { background: var(--surface3); }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 0 24px 24px; display: flex; gap: 10px; }
+
+  /* Toast */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px;
+    display: flex; flex-direction: column; gap: 8px; z-index: 500;
+  }
+  .toast {
+    padding: 12px 18px; border-radius: 12px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    display: flex; align-items: center; gap: 10px;
+    animation: toast-in .3s ease, toast-out .3s ease 2.7s forwards;
+    max-width: 320px;
+  }
+  @keyframes toast-in { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+  .toast.success { background: var(--green-soft); color: var(--green); border: 1px solid rgba(30,142,62,.2); }
+  .toast.error { background: var(--red-soft); color: var(--red); border: 1px solid rgba(217,48,37,.2); }
+  .toast.info { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(26,115,232,.2); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .right-panel { display: none; }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .sidebar { display: none; }
+    .app-body { padding: 12px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* Bankruptcy badge */
+  .bankrupt-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    background: var(--red-soft); color: var(--red);
+    border-radius: 20px; margin-left: 6px;
+  }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 32px 20px; color: var(--text3); }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Number format */
+  .currency-symbol { font-size: .7em; font-weight: 500; opacity: .7; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="logo-mark">🏦</div>
+    <div class="login-title">MonoBank</div>
+    <div class="login-sub">Banco digital para Monopoly. Sin efectivo físico.</div>
+
+    <div id="login-form">
+      <div class="input-group">
+        <label>Código de partida</label>
+        <input type="text" id="login-code" placeholder="Ej: MONOPOLY2025" />
+      </div>
+      <div class="input-group">
+        <label>Tu nombre</label>
+        <input type="text" id="login-name" placeholder="Ej: Juan" />
+      </div>
+      <button class="btn btn-primary" onclick="loginPlayer()">Entrar a la partida</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="new-game-section">
+      <p>¿Quieres comenzar una nueva partida?</p>
+      <button class="btn btn-ghost" style="width:100%;" onclick="goToSetup()">✨ Nueva partida</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <div class="setup-card">
+    <div class="logo-mark" style="width:48px;height:48px;font-size:22px;border-radius:14px;">🏦</div>
+    <h2>Nueva partida</h2>
+    <p>Ingresa los nombres de los jugadores (2 a 6)</p>
+
+    <div class="player-list" id="setup-player-list"></div>
+
+    <button class="add-player-btn" onclick="addPlayerEntry()">
+      <span>+</span> Agregar jugador
+    </button>
+
+    <div class="divider"></div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="showScreen('login')">← Volver</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="startGame()">Iniciar partida 🎲</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     APP SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-app" class="screen">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">🏦</div>
+      <div class="topbar-title">MonoBank</div>
+      <div style="width:1px;height:24px;background:var(--border);margin:0 4px;"></div>
+      <span style="font-size:13px;color:var(--text3);font-weight:500;" id="topbar-game-name">Partida</span>
+    </div>
+    <div class="topbar-right">
+      <div class="timer-badge" id="timer-badge" onclick="toggleTimer()">
+        <div class="dot"></div>
+        <span id="timer-display">00:00:00</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="showEndGameModal()">🏁 Fin</button>
+    </div>
+  </div>
+
+  <!-- App Body -->
+  <div class="app-body">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="card">
+        <div class="card-header">
+          <h3>Jugadores</h3>
+          <span id="sidebar-turn-indicator" style="font-size:11px;color:var(--accent);font-weight:600;">TURNO</span>
+        </div>
+        <div id="players-list-sidebar"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Operaciones</h3></div>
+        <div class="bank-ops">
+          <div class="bank-op-item" onclick="openBankModal('collect', 200)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--green-soft);">🏁</div>
+              <div>
+                <div class="bank-op-name">Pasar GO</div>
+                <div class="bank-op-desc">Cobrar $200</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+          <div class="bank-op-item" onclick="openBankModal('collect', 100)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--yellow-soft);">🃏</div>
+              <div>
+                <div class="bank-op-name">Tarjeta suerte</div>
+                <div class="bank-op-desc">Cobrar del banco</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+          <div class="bank-op-item" onclick="openBankModal('pay', 50)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--red-soft);">🏥</div>
+              <div>
+                <div class="bank-op-name">Impuesto/multa</div>
+                <div class="bank-op-desc">Pagar al banco</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+          <div class="bank-op-item" onclick="openBankModal('jail', 50)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--purple-soft);">⛓️</div>
+              <div>
+                <div class="bank-op-name">Salir de prisión</div>
+                <div class="bank-op-desc">Pagar fianza $50</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+          <div class="bank-op-item" onclick="openBankModal('house', 150)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--green-soft);">🏠</div>
+              <div>
+                <div class="bank-op-name">Comprar casa</div>
+                <div class="bank-op-desc">Pagar al banco</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+          <div class="bank-op-item" onclick="openBankModal('hotel', 750)">
+            <div class="bank-op-left">
+              <div class="bank-op-icon" style="background:var(--accent-soft);">🏨</div>
+              <div>
+                <div class="bank-op-name">Comprar hotel</div>
+                <div class="bank-op-desc">Pagar al banco</div>
+              </div>
+            </div>
+            <span class="bank-op-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+      <!-- Player Panel -->
+      <div class="player-panel" id="current-player-panel">
+        <div class="player-panel-header">
+          <div class="player-panel-avatar" id="panel-avatar">P</div>
+          <div class="player-panel-info">
+            <div class="player-panel-name" id="panel-name">Jugador</div>
+            <div class="player-panel-sub" id="panel-sub">Saldo disponible</div>
+          </div>
+          <div class="balance-display">
+            <div class="balance-label">Balance</div>
+            <div class="balance-amount" id="panel-balance">$0</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <div class="action-btn" onclick="openTransferModal()">
+            <span class="icon">💸</span>
+            <span class="label">Transferir</span>
+          </div>
+          <div class="action-btn" onclick="openBankModal('collect', 0)">
+            <span class="icon">📥</span>
+            <span class="label">Recibir del banco</span>
+          </div>
+          <div class="action-btn" onclick="openBankModal('pay', 0)">
+            <span class="icon">📤</span>
+            <span class="label">Pagar al banco</span>
+          </div>
+          <div class="action-btn" onclick="openBuyPropertyModal()">
+            <span class="icon">🏘️</span>
+            <span class="label">Comprar propiedad</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab('transactions')">Transacciones</button>
+          <button class="tab" onclick="switchTab('properties')">Propiedades</button>
+          <button class="tab" onclick="switchTab('history')">Historial</button>
+        </div>
+
+        <!-- Tab: Transactions -->
+        <div class="tab-content active" id="tab-transactions">
+          <div class="tx-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Destino</label>
+                <select id="tx-to">
+                  <option value="bank">🏦 Banco</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="tx-type">
+                  <option value="send">Enviar dinero</option>
+                  <option value="receive">Recibir dinero</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Monto</label>
+              <div class="amount-input-wrap">
+                <span class="currency">$</span>
+                <input type="number" id="tx-amount" placeholder="0" min="1" />
+              </div>
+              <div class="preset-amounts">
+                <button class="preset-btn" onclick="setAmount(50)">$50</button>
+                <button class="preset-btn" onclick="setAmount(100)">$100</button>
+                <button class="preset-btn" onclick="setAmount(200)">$200</button>
+                <button class="preset-btn" onclick="setAmount(500)">$500</button>
+                <button class="preset-btn" onclick="setAmount(1000)">$1000</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descripción (opcional)</label>
+              <input type="text" id="tx-desc" placeholder="Ej: Renta de calle, impuesto..." />
+            </div>
+            <button class="btn btn-primary" onclick="executeTransaction()">Confirmar transacción</button>
+          </div>
+        </div>
+
+        <!-- Tab: Properties -->
+        <div class="tab-content" id="tab-properties">
+          <div id="properties-content"></div>
+        </div>
+
+        <!-- Tab: History -->
+        <div class="tab-content" id="tab-history">
+          <div id="history-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+      <div class="card">
+        <div class="card-header"><h3>Turno actual</h3></div>
+        <div class="turn-card">
+          <div class="turn-label">Es el turno de</div>
+          <div class="turn-player" id="turn-indicator">
+            <div id="turn-avatar" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;"></div>
+            <div class="turn-player-name" id="turn-name">—</div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px;">
+            <button class="btn btn-green btn-sm" style="flex:1;" onclick="nextTurn()">Siguiente turno →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Estadísticas</h3></div>
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-label">Jugadores</div>
+            <div class="stat-value" id="stat-players">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Propiedades</div>
+            <div class="stat-value" id="stat-props">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Transacciones</div>
+            <div class="stat-value" id="stat-txs">0</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-label">Líder</div>
+            <div class="stat-value" style="font-size:13px;" id="stat-leader">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Ranking</h3></div>
+        <div id="ranking-list" style="padding:0;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODALS
+═══════════════════════════════════════ -->
+
+<!-- Transfer Modal -->
+<div class="modal-backdrop" id="modal-transfer">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💸 Transferir dinero</div>
+      <button class="modal-close" onclick="closeModal('modal-transfer')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tx-form">
+        <div class="form-group">
+          <label>Enviar a</label>
+          <select id="modal-tx-to"></select>
+        </div>
+        <div class="form-group">
+          <label>Monto</label>
+          <div class="amount-input-wrap">
+            <span class="currency">$</span>
+            <input type="number" id="modal-tx-amount" placeholder="0" min="1" />
+          </div>
+          <div class="preset-amounts">
+            <button class="preset-btn" onclick="setModalAmount(50)">$50</button>
+            <button class="preset-btn" onclick="setModalAmount(100)">$100</button>
+            <button class="preset-btn" onclick="setModalAmount(200)">$200</button>
+            <button class="preset-btn" onclick="setModalAmount(500)">$500</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <input type="text" id="modal-tx-desc" placeholder="Renta, multa, trato..." />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('modal-transfer')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="executeModalTransfer()">Transferir</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bank Modal -->
+<div class="modal-backdrop" id="modal-bank">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-bank-title">Operación bancaria</div>
+      <button class="modal-close" onclick="closeModal('modal-bank')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Monto</label>
+        <div class="amount-input-wrap">
+          <span class="currency">$</span>
+          <input type="number" id="modal-bank-amount" placeholder="0" min="1" />
+        </div>
+        <div class="preset-amounts" id="modal-bank-presets"></div>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <input type="text" id="modal-bank-desc" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('modal-bank')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" id="modal-bank-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Buy Property Modal -->
+<div class="modal-backdrop" id="modal-buy-prop">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🏘️ Comprar propiedad</div>
+      <button class="modal-close" onclick="closeModal('modal-buy-prop')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Seleccionar propiedad</label>
+        <select id="prop-select"></select>
+      </div>
+      <div id="prop-preview" style="margin-top:14px;display:none;">
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+          <div id="prop-preview-name" style="font-weight:600;margin-bottom:4px;"></div>
+          <div id="prop-preview-price" style="font-size:13px;color:var(--text2);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('modal-buy-prop')">Cancelar</button>
+      <button class="btn btn-primary" style="flex:2;" onclick="buyProperty()">Comprar</button>
+    </div>
+  </div>
+</div>
+
+<!-- End Game Modal -->
+<div class="modal-backdrop" id="modal-end">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🏁 Fin de partida</div>
+      <button class="modal-close" onclick="closeModal('modal-end')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="end-game-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModal('modal-end')">Continuar</button>
+      <button class="btn btn-danger" style="flex:2;" onclick="endGame()">Terminar y nueva partida</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════
+
+const INITIAL_BALANCE = 1500;
+const PLAYER_COLORS = ['#CC1616','#1A73E8','#1E8E3E','#F9AB00','#8430CE','#E37400'];
+const PLAYER_EMOJIS = ['🎩','🚂','🐶','🤠','👒','🚢'];
+
+const PROPERTIES = [
+  // Purple
+  { id:'prop1', name:'Bulevar Mediterráneo', price:60, rent:2, color:'#9C27B0', colorName:'Morado' },
+  { id:'prop2', name:'Avenida Báltica', price:60, rent:4, color:'#9C27B0', colorName:'Morado' },
+  // Light Blue
+  { id:'prop3', name:'Avenida Oriental', price:100, rent:6, color:'#03BCD4', colorName:'Celeste' },
+  { id:'prop4', name:'Vermont', price:100, rent:6, color:'#03BCD4', colorName:'Celeste' },
+  { id:'prop5', name:'Connecticut', price:120, rent:8, color:'#03BCD4', colorName:'Celeste' },
+  // Pink
+  { id:'prop6', name:'St. Charles', price:140, rent:10, color:'#E91E63', colorName:'Rosa' },
+  { id:'prop7', name:'Estados', price:140, rent:10, color:'#E91E63', colorName:'Rosa' },
+  { id:'prop8', name:'Virginia', price:160, rent:12, color:'#E91E63', colorName:'Rosa' },
+  // Orange
+  { id:'prop9', name:'St. James', price:180, rent:14, color:'#FF5722', colorName:'Naranja' },
+  { id:'prop10', name:'Tennessee', price:180, rent:14, color:'#FF5722', colorName:'Naranja' },
+  { id:'prop11', name:'Nueva York', price:200, rent:16, color:'#FF5722', colorName:'Naranja' },
+  // Red
+  { id:'prop12', name:'Kentucky', price:220, rent:18, color:'#F44336', colorName:'Rojo' },
+  { id:'prop13', name:'Indiana', price:220, rent:18, color:'#F44336', colorName:'Rojo' },
+  { id:'prop14', name:'Illinois', price:240, rent:20, color:'#F44336', colorName:'Rojo' },
+  // Yellow
+  { id:'prop15', name:'Atlantic', price:260, rent:22, color:'#FFC107', colorName:'Amarillo' },
+  { id:'prop16', name:'Ventnor', price:260, rent:22, color:'#FFC107', colorName:'Amarillo' },
+  { id:'prop17', name:'Marvin Gardens', price:280, rent:24, color:'#FFC107', colorName:'Amarillo' },
+  // Green
+  { id:'prop18', name:'Pacific', price:300, rent:26, color:'#4CAF50', colorName:'Verde' },
+  { id:'prop19', name:'North Carolina', price:300, rent:26, color:'#4CAF50', colorName:'Verde' },
+  { id:'prop20', name:'Pennsylvania', price:320, rent:28, color:'#4CAF50', colorName:'Verde' },
+  // Dark Blue
+  { id:'prop21', name:'Park Place', price:350, rent:35, color:'#1565C0', colorName:'Azul' },
+  { id:'prop22', name:'Boardwalk', price:400, rent:50, color:'#1565C0', colorName:'Azul' },
+  // Stations
+  { id:'st1', name:'Estación Lectura', price:200, rent:25, color:'#607D8B', colorName:'Estación' },
+  { id:'st2', name:'Estación Pennsylvania', price:200, rent:25, color:'#607D8B', colorName:'Estación' },
+  { id:'st3', name:'Estación B&O', price:200, rent:25, color:'#607D8B', colorName:'Estación' },
+  { id:'st4', name:'Estación Short Line', price:200, rent:25, color:'#607D8B', colorName:'Estación' },
+  // Utilities
+  { id:'ut1', name:'Compañía Eléctrica', price:150, rent:0, color:'#78909C', colorName:'Servicios' },
+  { id:'ut2', name:'Empresa de Agua', price:150, rent:0, color:'#78909C', colorName:'Servicios' },
+];
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+
+let state = {
+  gameCode: '',
+  players: [],
+  currentPlayerIndex: 0,
+  currentViewIndex: 0,
+  history: [],
+  timerSeconds: 0,
+  timerRunning: false,
+  turnCount: 1,
+};
+
+let timerInterval = null;
+
+// ═══════════════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════════════
+
+function saveState() {
+  localStorage.setItem('monobank_state', JSON.stringify(state));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('monobank_state');
+  if (raw) {
+    try { state = JSON.parse(raw); return true; }
+    catch(e) {}
+  }
+  return false;
+}
+
+function clearState() {
+  localStorage.removeItem('monobank_state');
+}
+
+// ═══════════════════════════════════════════════════
+//  SCREENS
+// ═══════════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════
+
+function loginPlayer() {
+  const code = document.getElementById('login-code').value.trim().toUpperCase();
+  const name = document.getElementById('login-name').value.trim();
+  if (!code) { showToast('Ingresa el código de partida', 'error'); return; }
+  if (!name) { showToast('Ingresa tu nombre', 'error'); return; }
+
+  const raw = localStorage.getItem('monobank_state');
+  if (!raw) { showToast('No hay partida con ese código. Crea una nueva.', 'error'); return; }
+
+  try {
+    const saved = JSON.parse(raw);
+    if (saved.gameCode !== code) { showToast('Código incorrecto', 'error'); return; }
+    state = saved;
+    // Set view to this player
+    const idx = state.players.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+    if (idx >= 0) {
+      state.currentViewIndex = idx;
+    } else {
+      showToast('Jugador no encontrado en esta partida', 'error'); return;
+    }
+    initApp();
+    showScreen('app');
+    showToast(`¡Bienvenido, ${name}!`, 'success');
+  } catch(e) {
+    showToast('Error al cargar partida', 'error');
+  }
+}
+
+function goToSetup() {
+  // Build default 4 players
+  const setupList = document.getElementById('setup-player-list');
+  setupList.innerHTML = '';
+  for (let i = 0; i < 4; i++) addPlayerEntry();
+  showScreen('setup');
+}
+
+// ═══════════════════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════════════════
+
+let setupPlayerCount = 0;
+
+function addPlayerEntry() {
+  const list = document.getElementById('setup-player-list');
+  const entries = list.querySelectorAll('.player-entry');
+  if (entries.length >= 6) { showToast('Máximo 6 jugadores', 'error'); return; }
+  const idx = entries.length;
+  const color = PLAYER_COLORS[idx];
+  const emoji = PLAYER_EMOJIS[idx];
+  const div = document.createElement('div');
+  div.className = 'player-entry';
+  div.innerHTML = `
+    <div class="player-avatar-sm" style="background:${color}">${emoji}</div>
+    <input type="text" placeholder="Jugador ${idx+1}" value="Jugador ${idx+1}" />
+    <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+  `;
+  list.appendChild(div);
+}
+
+function startGame() {
+  const entries = document.querySelectorAll('#setup-player-list .player-entry');
+  if (entries.length < 2) { showToast('Necesitas al menos 2 jugadores', 'error'); return; }
+
+  const names = [];
+  entries.forEach(e => {
+    const n = e.querySelector('input').value.trim();
+    if (n) names.push(n);
+  });
+  if (names.length < 2) { showToast('Completa los nombres', 'error'); return; }
+
+  // Clear old state
+  clearState();
+
+  const code = 'MONO' + Math.random().toString(36).substr(2,6).toUpperCase();
+
+  state = {
+    gameCode: code,
+    players: names.map((name, i) => ({
+      id: 'p' + i,
+      name,
+      color: PLAYER_COLORS[i],
+      emoji: PLAYER_EMOJIS[i],
+      balance: INITIAL_BALANCE,
+      properties: [],
+      bankrupt: false,
+    })),
+    currentPlayerIndex: 0,
+    currentViewIndex: 0,
+    history: [],
+    timerSeconds: 0,
+    timerRunning: false,
+    turnCount: 1,
+  };
+
+  addHistoryEntry('system', `🎲 Partida iniciada. Código: ${code}`, null, null, 0);
+  saveState();
+  initApp();
+  showScreen('app');
+  showToast(`Partida creada: ${code}`, 'success');
+  alert(`¡Partida creada!\nCódigo: ${code}\n\nCompartilo con los jugadores para que entren con su nombre.`);
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT APP
+// ═══════════════════════════════════════════════════
+
+function initApp() {
+  document.getElementById('topbar-game-name').textContent = state.gameCode;
+  renderSidebar();
+  renderCurrentPlayer();
+  renderTurnIndicator();
+  renderStats();
+  renderRanking();
+  updateTimerDisplay();
+  populateTxSelects();
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+
+function renderSidebar() {
+  const list = document.getElementById('players-list-sidebar');
+  list.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const isActive = i === state.currentPlayerIndex;
+    const isView = i === state.currentViewIndex;
+    const div = document.createElement('div');
+    div.className = 'player-card-item' + (isView ? ' active' : '');
+    div.onclick = () => { state.currentViewIndex = i; renderCurrentPlayer(); renderSidebar(); };
+    const propCount = p.properties.length;
+    div.innerHTML = `
+      <div class="player-avatar" style="background:${p.color}">
+        ${p.emoji}
+        <div class="turn-ring ${isActive ? 'active' : ''}"></div>
+      </div>
+      <div class="player-info">
+        <div class="player-name">${p.name}${p.bankrupt ? '<span class="bankrupt-badge">💀 Quiebra</span>' : ''}</div>
+        <div class="player-balance">$${fmt(p.balance)}</div>
+      </div>
+      <span class="player-prop-count">${propCount} prop.</span>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function renderCurrentPlayer() {
+  const p = state.players[state.currentViewIndex];
+  if (!p) return;
+
+  const avatar = document.getElementById('panel-avatar');
+  avatar.textContent = p.emoji;
+  avatar.style.background = p.color;
+
+  document.getElementById('panel-name').textContent = p.name + (p.bankrupt ? ' 💀' : '');
+  document.getElementById('panel-sub').textContent = p.bankrupt ? 'En quiebra' : `${p.properties.length} propiedades`;
+  document.getElementById('panel-balance').textContent = '$' + fmt(p.balance);
+
+  renderProperties();
+  renderHistory();
+  populateTxSelects();
+}
+
+function renderTurnIndicator() {
+  const p = state.players[state.currentPlayerIndex];
+  if (!p) return;
+  const avatar = document.getElementById('turn-avatar');
+  avatar.textContent = p.emoji;
+  avatar.style.background = p.color;
+  document.getElementById('turn-name').textContent = p.name;
+}
+
+function renderStats() {
+  document.getElementById('stat-players').textContent = state.players.filter(p => !p.bankrupt).length;
+  const totalProps = state.players.reduce((s, p) => s + p.properties.length, 0);
+  document.getElementById('stat-props').textContent = totalProps;
+  document.getElementById('stat-txs').textContent = state.history.filter(h => h.type === 'transaction').length;
+  const leader = [...state.players].sort((a,b) => b.balance - a.balance)[0];
+  document.getElementById('stat-leader').textContent = leader ? leader.emoji : '—';
+}
+
+function renderRanking() {
+  const list = document.getElementById('ranking-list');
+  const sorted = [...state.players].sort((a,b) => b.balance - a.balance);
+  list.innerHTML = sorted.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);${i===sorted.length-1?'border-bottom:none;':''}">
+      <span style="font-size:12px;font-weight:700;color:var(--text3);width:16px;">${i+1}</span>
+      <div style="width:28px;height:28px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:13px;">${p.emoji}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;">${p.name}</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--green);">$${fmt(p.balance)}</div>
+    </div>
+  `).join('');
+}
+
+function renderProperties() {
+  const p = state.players[state.currentViewIndex];
+  const container = document.getElementById('properties-content');
+  if (!p) return;
+
+  if (p.properties.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🏘️</div><p>No tiene propiedades aún</p></div>`;
+    return;
+  }
+
+  const props = p.properties.map(id => PROPERTIES.find(pr => pr.id === id)).filter(Boolean);
+  container.innerHTML = `<div class="props-grid">${props.map(prop => `
+    <div class="prop-card" title="${prop.name}">
+      <div class="prop-color" style="background:${prop.color}"></div>
+      <div class="prop-body">
+        <div class="prop-name">${prop.name}</div>
+        <div class="prop-price">💰 $${prop.price}</div>
+        <div class="prop-price" style="margin-top:2px;">🏷️ Renta $${prop.rent}</div>
+        <span class="prop-owner" style="background:${hexToSoft(prop.color)};color:${prop.color};">${prop.colorName}</span>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderHistory() {
+  const container = document.getElementById('history-content');
+  const items = [...state.history].reverse().slice(0, 30);
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>Sin historial aún</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="history-list">${items.map(h => {
+    let icon = '📝', iconBg = 'var(--surface2)', amountHtml = '';
+    if (h.type === 'transaction') {
+      const isCredit = h.to === state.players[state.currentViewIndex]?.id;
+      const isDebit = h.from === state.players[state.currentViewIndex]?.id;
+      if (isCredit) { icon='📥'; iconBg='var(--green-soft)'; amountHtml=`<div class="history-amount credit">+$${fmt(h.amount)}</div>`; }
+      else if (isDebit) { icon='📤'; iconBg='var(--red-soft)'; amountHtml=`<div class="history-amount debit">-$${fmt(h.amount)}</div>`; }
+      else { icon='💸'; iconBg='var(--accent-soft)'; }
+    } else if (h.type === 'property') {
+      icon='🏘️'; iconBg='var(--yellow-soft)';
+      amountHtml=`<div class="history-amount debit">-$${fmt(h.amount)}</div>`;
+    } else if (h.type === 'system') {
+      icon='🎲'; iconBg='var(--purple-soft)';
+    }
+    return `
+      <div class="history-item">
+        <div class="history-icon" style="background:${iconBg}">${icon}</div>
+        <div class="history-info">
+          <div class="history-desc">${h.desc}</div>
+          <div class="history-time">${h.time} · Turno ${h.turn}</div>
+        </div>
+        ${amountHtml}
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════
+//  POPULATE SELECTS
+// ═══════════════════════════════════════════════════
+
+function populateTxSelects() {
+  const txTo = document.getElementById('tx-to');
+  const modalTo = document.getElementById('modal-tx-to');
+  const currentPlayer = state.players[state.currentViewIndex];
+
+  [txTo, modalTo].forEach(sel => {
+    if (!sel) return;
+    sel.innerHTML = '<option value="bank">🏦 Banco</option>';
+    state.players.forEach(p => {
+      if (p.id !== currentPlayer?.id) {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.emoji + ' ' + p.name;
+        sel.appendChild(opt);
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  TRANSACTIONS
+// ═══════════════════════════════════════════════════
+
+function executeTransaction() {
+  const fromPlayer = state.players[state.currentViewIndex];
+  if (!fromPlayer) return;
+
+  const toId = document.getElementById('tx-to').value;
+  const type = document.getElementById('tx-type').value;
+  const amount = parseInt(document.getElementById('tx-amount').value);
+  const desc = document.getElementById('tx-desc').value.trim() || (type === 'send' ? 'Pago' : 'Cobro');
+
+  if (!amount || amount <= 0) { showToast('Ingresa un monto válido', 'error'); return; }
+
+  if (type === 'send') {
+    // From current player to someone
+    if (fromPlayer.balance < amount && !fromPlayer.bankrupt) {
+      showToast('Saldo insuficiente', 'error'); return;
+    }
+    fromPlayer.balance -= amount;
+
+    if (toId !== 'bank') {
+      const toPlayer = state.players.find(p => p.id === toId);
+      if (toPlayer) toPlayer.balance += amount;
+      addHistoryEntry('transaction', `${fromPlayer.name} → ${toPlayer?.name || 'Banco'}: ${desc}`, fromPlayer.id, toId, amount);
+      showToast(`Transferido $${fmt(amount)} a ${toPlayer?.name}`, 'success');
+    } else {
+      addHistoryEntry('transaction', `${fromPlayer.name} pagó al banco: ${desc}`, fromPlayer.id, 'bank', amount);
+      showToast(`Pagado $${fmt(amount)} al banco`, 'info');
+    }
+  } else {
+    // Receive — from bank or another player
+    if (toId !== 'bank') {
+      const fromOther = state.players.find(p => p.id === toId);
+      if (fromOther && fromOther.balance < amount) { showToast('El jugador no tiene suficiente saldo', 'error'); return; }
+      if (fromOther) fromOther.balance -= amount;
+      fromPlayer.balance += amount;
+      addHistoryEntry('transaction', `${fromOther?.name} → ${fromPlayer.name}: ${desc}`, toId, fromPlayer.id, amount);
+      showToast(`Recibido $${fmt(amount)} de ${fromOther?.name}`, 'success');
+    } else {
+      fromPlayer.balance += amount;
+      addHistoryEntry('transaction', `${fromPlayer.name} cobró del banco: ${desc}`, 'bank', fromPlayer.id, amount);
+      showToast(`Recibido $${fmt(amount)} del banco`, 'success');
+    }
+  }
+
+  document.getElementById('tx-amount').value = '';
+  document.getElementById('tx-desc').value = '';
+  saveState();
+  refreshAll();
+}
+
+function executeModalTransfer() {
+  const fromPlayer = state.players[state.currentViewIndex];
+  const toId = document.getElementById('modal-tx-to').value;
+  const amount = parseInt(document.getElementById('modal-tx-amount').value);
+  const desc = document.getElementById('modal-tx-desc').value.trim() || 'Transferencia';
+
+  if (!amount || amount <= 0) { showToast('Monto inválido', 'error'); return; }
+  if (fromPlayer.balance < amount) { showToast('Saldo insuficiente', 'error'); return; }
+
+  fromPlayer.balance -= amount;
+  const toPlayer = state.players.find(p => p.id === toId);
+  if (toPlayer) {
+    toPlayer.balance += amount;
+    addHistoryEntry('transaction', `${fromPlayer.name} → ${toPlayer.name}: ${desc}`, fromPlayer.id, toId, amount);
+    showToast(`$${fmt(amount)} enviado a ${toPlayer.name}`, 'success');
+  }
+
+  closeModal('modal-transfer');
+  saveState();
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  BANK MODAL
+// ═══════════════════════════════════════════════════
+
+let bankModalMode = 'collect';
+
+function openBankModal(mode, defaultAmt) {
+  bankModalMode = mode;
+  const titles = {
+    collect: '📥 Cobrar del banco',
+    pay: '📤 Pagar al banco',
+    jail: '⛓️ Salir de prisión',
+    house: '🏠 Comprar casa',
+    hotel: '🏨 Comprar hotel',
+  };
+  document.getElementById('modal-bank-title').textContent = titles[mode] || 'Operación bancaria';
+  document.getElementById('modal-bank-amount').value = defaultAmt || '';
+  document.getElementById('modal-bank-desc').value = titles[mode]?.replace(/^\S+ /, '') || '';
+
+  const presets = {
+    collect: [50, 100, 150, 200, 500],
+    pay: [50, 75, 100, 200],
+    jail: [50],
+    house: [50, 100, 150, 200],
+    hotel: [250, 500, 750],
+  };
+  document.getElementById('modal-bank-presets').innerHTML = (presets[mode] || []).map(v =>
+    `<button class="preset-btn" onclick="document.getElementById('modal-bank-amount').value=${v}">$${v}</button>`
+  ).join('');
+
+  const btnLabel = mode === 'collect' ? 'Cobrar' : 'Pagar';
+  const btn = document.getElementById('modal-bank-btn');
+  btn.textContent = btnLabel;
+  btn.onclick = executeBankOp;
+
+  openModal('modal-bank');
+}
+
+function executeBankOp() {
+  const p = state.players[state.currentViewIndex];
+  const amount = parseInt(document.getElementById('modal-bank-amount').value);
+  const desc = document.getElementById('modal-bank-desc').value || 'Operación bancaria';
+
+  if (!amount || amount <= 0) { showToast('Monto inválido', 'error'); return; }
+
+  if (bankModalMode === 'collect') {
+    p.balance += amount;
+    addHistoryEntry('transaction', `${p.name} cobró del banco: ${desc}`, 'bank', p.id, amount);
+    showToast(`$${fmt(amount)} recibido del banco`, 'success');
+  } else {
+    if (p.balance < amount) { showToast('Saldo insuficiente', 'error'); return; }
+    p.balance -= amount;
+    addHistoryEntry('transaction', `${p.name} pagó al banco: ${desc}`, p.id, 'bank', amount);
+    showToast(`$${fmt(amount)} pagado al banco`, 'info');
+  }
+
+  closeModal('modal-bank');
+  saveState();
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  PROPERTIES
+// ═══════════════════════════════════════════════════
+
+function openBuyPropertyModal() {
+  const p = state.players[state.currentViewIndex];
+  const ownedAll = PROPERTIES.reduce((s, pr) => {
+    s.add(...(state.players.flatMap(pl => pl.properties)));
+    return s;
+  }, new Set());
+
+  const available = PROPERTIES.filter(pr => {
+    const owner = state.players.find(pl => pl.properties.includes(pr.id));
+    return !owner;
+  });
+
+  const select = document.getElementById('prop-select');
+  select.innerHTML = available.map(pr =>
+    `<option value="${pr.id}">${pr.colorName} — ${pr.name} ($${pr.price})</option>`
+  ).join('');
+
+  if (!available.length) {
+    select.innerHTML = '<option>No hay propiedades disponibles</option>';
+  }
+
+  select.onchange = () => {
+    const pr = PROPERTIES.find(x => x.id === select.value);
+    if (pr) {
+      document.getElementById('prop-preview-name').textContent = pr.name;
+      document.getElementById('prop-preview-price').textContent = `Precio: $${pr.price} · Renta: $${pr.rent}`;
+      document.getElementById('prop-preview').style.display = 'block';
+    }
+  };
+  select.dispatchEvent(new Event('change'));
+
+  openModal('modal-buy-prop');
+}
+
+function buyProperty() {
+  const p = state.players[state.currentViewIndex];
+  const propId = document.getElementById('prop-select').value;
+  const prop = PROPERTIES.find(pr => pr.id === propId);
+  if (!prop) { showToast('Selecciona una propiedad', 'error'); return; }
+  if (p.balance < prop.price) { showToast('Saldo insuficiente', 'error'); return; }
+
+  p.balance -= prop.price;
+  p.properties.push(prop.id);
+  addHistoryEntry('property', `${p.name} compró ${prop.name}`, p.id, 'bank', prop.price);
+  showToast(`✅ ${prop.name} comprada`, 'success');
+
+  closeModal('modal-buy-prop');
+  saveState();
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  TURNS
+// ═══════════════════════════════════════════════════
+
+function nextTurn() {
+  const active = state.players.filter(p => !p.bankrupt);
+  if (active.length === 0) return;
+
+  let next = (state.currentPlayerIndex + 1) % state.players.length;
+  while (state.players[next].bankrupt) {
+    next = (next + 1) % state.players.length;
+  }
+  state.currentPlayerIndex = next;
+  state.turnCount++;
+
+  addHistoryEntry('system', `🎲 Turno ${state.turnCount}: turno de ${state.players[next].name}`, null, null, 0);
+  showToast(`Turno de ${state.players[next].name}`, 'info');
+  saveState();
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  END GAME
+// ═══════════════════════════════════════════════════
+
+function showEndGameModal() {
+  const sorted = [...state.players].sort((a,b) => b.balance - a.balance);
+  const winner = sorted[0];
+  let html = `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:48px;margin-bottom:8px;">${winner.emoji}</div>
+      <div style="font-size:18px;font-weight:700;">¡${winner.name} va ganando!</div>
+      <div style="font-size:14px;color:var(--text2);">$${fmt(winner.balance)} · ${winner.properties.length} propiedades</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+  `;
+  sorted.forEach((p, i) => {
+    const totalPropValue = p.properties.reduce((s, id) => {
+      const pr = PROPERTIES.find(x => x.id === id);
+      return s + (pr?.price || 0);
+    }, 0);
+    html += `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:10px;">
+        <span style="font-size:16px;font-weight:700;color:var(--text3);width:20px;">${i+1}</span>
+        <div style="width:32px;height:32px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:14px;">${p.emoji}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${p.name}</div>
+          <div style="font-size:12px;color:var(--text3);">${p.properties.length} propiedades · $${fmt(totalPropValue)} en activos</div>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:var(--green);">$${fmt(p.balance)}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('end-game-content').innerHTML = html;
+  openModal('modal-end');
+}
+
+function endGame() {
+  clearState();
+  stopTimer();
+  closeModal('modal-end');
+  showScreen('login');
+  showToast('Partida terminada. ¡Hasta la próxima!', 'info');
+}
+
+// ═══════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════
+
+function toggleTimer() {
+  if (state.timerRunning) {
+    stopTimer();
+  } else {
+    startTimer();
+  }
+}
+
+function startTimer() {
+  state.timerRunning = true;
+  document.getElementById('timer-badge').classList.add('running');
+  timerInterval = setInterval(() => {
+    state.timerSeconds++;
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function stopTimer() {
+  state.timerRunning = false;
+  document.getElementById('timer-badge').classList.remove('running');
+  clearInterval(timerInterval);
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(state.timerSeconds / 3600);
+  const m = Math.floor((state.timerSeconds % 3600) / 60);
+  const s = state.timerSeconds % 60;
+  document.getElementById('timer-display').textContent =
+    `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// ═══════════════════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════════════════
+
+function addHistoryEntry(type, desc, from, to, amount) {
+  state.history.push({
+    id: Date.now(),
+    type, desc, from, to, amount,
+    time: new Date().toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'}),
+    turn: state.turnCount,
+  });
+  if (state.history.length > 200) state.history = state.history.slice(-200);
+}
+
+// ═══════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════
+//  MODAL HELPERS
+// ═══════════════════════════════════════════════════
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openTransferModal() {
+  document.getElementById('modal-tx-amount').value = '';
+  document.getElementById('modal-tx-desc').value = '';
+  populateTxSelects();
+  openModal('modal-transfer');
+}
+
+document.querySelectorAll('.modal-backdrop').forEach(b => {
+  b.addEventListener('click', e => {
+    if (e.target === b) b.classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════════
+//  TOASTS
+// ═══════════════════════════════════════════════════
+
+function showToast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+// ═══════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════
+
+function fmt(n) {
+  return Number(n).toLocaleString('es');
+}
+
+function hexToSoft(hex) {
+  return hex + '22';
+}
+
+function setAmount(v) { document.getElementById('tx-amount').value = v; }
+function setModalAmount(v) { document.getElementById('modal-tx-amount').value = v; }
+
+function refreshAll() {
+  renderSidebar();
+  renderCurrentPlayer();
+  renderTurnIndicator();
+  renderStats();
+  renderRanking();
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT — Check for existing session
+// ═══════════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+  const hasSaved = loadState();
+  if (hasSaved && state.players.length > 0) {
+    // Auto-resume
+    document.getElementById('login-code').value = state.gameCode;
+  }
+});
+</script>
+</body>
+</html>
